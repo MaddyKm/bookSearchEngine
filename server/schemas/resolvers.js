@@ -3,15 +3,15 @@ const { signToken, AuthenticationError } = require("../utils/auth");
 
 const resolvers = {
   Query: {
-    users: async () => {
-      return User.find();
-    },
-    user: async (parent, { username }) => {
-      return User.findOne({ username }).populate("books");
-    },
-    me: async (parent, args, context) => {
+    // users: () => {
+    //   return User.find();
+    // },
+    // user: (parent, { username }) => {
+    //   return User.findOne({ username });
+    // },
+    me: (parent, args, context) => {
       if (context.user) {
-        return User.findOne({ _id: context.user._id }).populate("books");
+        return User.findOne({ _id: context.user._id });
       }
       throw AuthenticationError;
     },
@@ -30,7 +30,7 @@ const resolvers = {
       }
       const correctPw = await user.isCorrectPassword(password);
 
-      if (!correctPW) {
+      if (!correctPw) {
         throw AuthenticationError;
       }
 
@@ -38,17 +38,6 @@ const resolvers = {
 
       return { token, user };
     },
-    addBook: async (parent, { user, body }, context) => {
-      if (context.user) {
-        await User.findOneAndUpdate(
-          { _id: user._id },
-          { $addToSet: { savedBooks: body } },
-          { new: true, runValidators: true }
-        );
-
-        return user;
-      }
-      throw AuthenticationError;
-    },
   },
 };
+module.exports = resolvers;
